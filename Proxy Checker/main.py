@@ -19,7 +19,6 @@ from src.proxyConfig import ProxyType, CheckerType
 # TODO: proxy identifier (auto-sorter, slower, more bandwith)
 # TODO: test on windows as well.
 # TODO: implement the new API (socket API)
-# NOTE: use easyGUI for a nice window when choosing proxy path
 
 
 @func_logger
@@ -29,6 +28,8 @@ def main():
     proxy_type: ProxyType = inputObj.get_proxy_type()
     proxies_list: list[bytes] = inputObj.get_proxies()
     num_threads: int = inputObj.get_threads()
+    
+    # NOTE: not used bcs I need to update it to support check types.
     checker_type: CheckerType = inputObj.get_checker_type()
 
     CheckerObj = ProxyChecker(proxies_list, num_threads, proxy_type)
