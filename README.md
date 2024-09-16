@@ -1,5 +1,7 @@
 # Fast-MultiThreaded-ProxyChecker
 
+**For issues contact me on discord: alimuhammadsecured_65817**
+
 MacOSx/Linux/Windows Multi-threaded Proxy Checker, User Friendly
 =============
 
