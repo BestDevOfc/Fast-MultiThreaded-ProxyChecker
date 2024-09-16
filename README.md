@@ -22,6 +22,7 @@ cd cd Proxy\ Checker/
 Installing the third-party modules:
 ```
 python3 -m pip install -r requirements.txt
+
 OR
 
 pip install -r requirements.txt
