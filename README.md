@@ -27,8 +27,8 @@ python3 ./main.py
 ```
 
 TODOs:
-1) Add socket as a checker type (currently only supports web)
-2) More testing on Linux & Windows (Developed on Mac OS X)
-3) Proxy Sorter for unknown proxies
+1. Add socket as a checker type (currently only supports web)
+2. More testing on Linux & Windows (Developed on Mac OS X)
+3. Proxy Sorter for unknown proxies
 
 
