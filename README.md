@@ -1,7 +1,7 @@
 # Fast-MultiThreaded-ProxyChecker
 
 
-For issues contact me on discord: <span style="color: blue;">alimuhammadsecured_65817</span>
+For issues contact me on discord: <b style="color: blue;">alimuhammadsecured_65817</b>
 
 MacOSx/Linux/Windows Multi-threaded Proxy Checker, User Friendly
 =============
