@@ -10,8 +10,8 @@ A portable, simple, fast, and easy-to-use Python Proxy Checker for web scraping.
 
 # Installation
 ```bash
-git clone URL
-cd REPO_DIRECTORY
+git clone https://github.com/BestDevOfc/Fast-MultiThreaded-ProxyChecker.git
+cd Fast-MultiThreaded-ProxyChecker
 ```
 
 Installing the third-party modules:
