@@ -1,0 +1,5 @@
+tk-tools==0.16.0
+requests==2.31.0
+urllib3==2.2.3
+PySocks==1.7.1
+colorama==0.4.6
