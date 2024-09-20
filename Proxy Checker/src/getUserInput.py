@@ -65,7 +65,8 @@ class GetUserInput(object):
         number_to_enum = {
             1: ProxyType.HTTP_HTTPS,
             2: ProxyType.SOCKS4,
-            3: ProxyType.SOCKS5
+            3: ProxyType.SOCKS5,
+            5: ProxyType.NONE
         }
         while True:
             try:
@@ -81,6 +82,7 @@ class GetUserInput(object):
                             {Cols.RED} [2] - {Cols.YELLOW} [ SOCKS4 ]
                             {Cols.RED} [3] - {Cols.YELLOW} [ SOCKS5 ]
                             {Cols.RED} [4] - {Cols.MAGENTA} [ Unknown (auto-identifier) ]
+                            {Cols.RED} [5] - {Cols.MAGENTA} [ Don't know, just check if alive ]
                             
 
                             {Display.LINE}

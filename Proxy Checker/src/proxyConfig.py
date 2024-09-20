@@ -4,6 +4,7 @@ class ProxyType:
     SOCKS5: str = "socks5"
     SOCKS4: str = "socks4"
     HTTP_HTTPS: str = "http"
+    NONE: str = "NONE"
     
 
 class CheckerType:
