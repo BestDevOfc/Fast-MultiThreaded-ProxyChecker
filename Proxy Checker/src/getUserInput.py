@@ -39,12 +39,14 @@ class GetUserInput(object):
                 if not file_path:
                     raise customException(f"No file selected, please select one")
                 break
+            
+            except customException as err: # NOTE: this NEEDS to come before the default, it's like a switch statement
+                loggerObj.log_err(f"in \'get_file_path()\' --> {err}")
+                print_err(f"{err}", True)
             except Exception as err:
                 loggerObj.log_err(f"in \'get_file_path()\' --> {err}")
                 print_err(f"{err}", False)
-            except customException as err:
-                loggerObj.log_err(f"in \'get_file_path()\' --> {err}")
-                print_err(f"{err}", True)
+
         
         '''
         
@@ -59,7 +61,7 @@ class GetUserInput(object):
         return file_path
 
     
-    def get_proxy_type(self) -> ProxyType:
+    def get_proxy_type(self, can_use_sorter: bool) -> ProxyType:
         number_to_enum = {
             1: ProxyType.HTTP_HTTPS,
             2: ProxyType.SOCKS4,
@@ -68,31 +70,62 @@ class GetUserInput(object):
         while True:
             try:
                 clear_screen()
-                print(f'''
-                        {Display.TITLE}                    
-                        {Display.LINE}
+                if can_use_sorter:
+                    print(f'''
+                            {Display.TITLE}                    
+                            {Display.LINE}
 
-                        {Cols.RED} [+] - {Cols.GREEN} [ What Proxies are you checking? ]
-                        
-                        {Cols.RED} [1] - {Cols.YELLOW} [ HTTP/HTTPS ]
-                        {Cols.RED} [2] - {Cols.YELLOW} [ SOCKS4 ]
-                        {Cols.RED} [3] - {Cols.YELLOW} [ SOCKS5 ]
-                        {Cols.RED} [TODO] - {Cols.MAGENTA} [ Unknown (auto-identifier) ]
+                            {Cols.RED} [+] - {Cols.GREEN} [ What Proxies are you checking? ]
+                            
+                            {Cols.RED} [1] - {Cols.YELLOW} [ HTTP/HTTPS ]
+                            {Cols.RED} [2] - {Cols.YELLOW} [ SOCKS4 ]
+                            {Cols.RED} [3] - {Cols.YELLOW} [ SOCKS5 ]
+                            {Cols.RED} [4] - {Cols.MAGENTA} [ Unknown (auto-identifier) ]
+                            
 
-                        {Display.LINE}
-                    ''') 
+                            {Display.LINE}
+                        ''') 
+                else:
+                    print(f'''
+                            {Display.TITLE}                    
+                            {Display.LINE}
+
+                            {Cols.RED} [+] - {Cols.GREEN} [ What Proxies are you checking? ]
+                            
+                            {Cols.RED} [1] - {Cols.YELLOW} [ HTTP/HTTPS ]
+                            {Cols.RED} [2] - {Cols.YELLOW} [ SOCKS4 ]
+                            {Cols.RED} [3] - {Cols.YELLOW} [ SOCKS5 ]
+                            {Cols.RED} [*] - {Cols.MAGENTA} [ Unknown (auto-identifier) * can only use this with API 2! *]
+
+                            {Display.LINE}
+                        ''') 
                 proxy_type = int(input("[+] - ").strip().rstrip())
-                if proxy_type not in number_to_enum.keys():
+                if proxy_type == 4 and can_use_sorter != True:
+                    raise customException(f"""
+                        
+                        [!] - You can only use the auto proxy identifier/solver with the Sockets API ! 
+
+                        ------------------------------------------------------------------------------------------------
+                        The reason for this is because we'll be using the socket connection to test if the proxy 
+                        is live and then we'll bruteforce the proxy type with 3 HTTP requests, the 
+                        reason we force them to select socket is so they understand they're using
+                        sockets which can get them ISP bans if they do many scans, hopefully
+                        this will encourage any newcomers to use VPNs. X-VPN is a good free VPN, just 
+                        use that.
+                        ------------------------------------------------------------------------------------------------
+                                          """)
+                elif proxy_type not in number_to_enum.keys():
                     raise customException(f"[ Invalid Proxy Type! ]")
                 else:
                     return number_to_enum[proxy_type]
 
+            except customException as err:
+                loggerObj.log_err(f"in \'get_proxy_type()\' --> {err}")
+                print_err(f"{err}", False)
             except Exception as err:
                 loggerObj.log_err(f"in \'get_proxy_type()\' --> {err}")
                 print_err(f"Something went wrong, please try again", False)
-            except customException as err:
-                loggerObj.log_err(f"in \'get_proxy_type()\' --> {err}")
-                print_err(f"{err}", True)
+
     def get_proxies(self) -> list[bytes]:
         while True:
             try:
@@ -114,12 +147,13 @@ class GetUserInput(object):
                 return proxies_list
                     
 
-            except Exception as err:
-                loggerObj.log_err(f"in \'get_proxies()\' --> {err}")
-                print_err(f"Something went wrong, please try again", False)
             except customException as err:
                 loggerObj.log_err(f"in \'get_proxies()\' --> {err}")
                 print_err(f"{err}", True)
+            except Exception as err:
+                loggerObj.log_err(f"in \'get_proxies()\' --> {err}")
+                print_err(f"Something went wrong, please try again", False)
+
     def get_threads(self) -> int:
         while True:
             try:
@@ -138,14 +172,15 @@ class GetUserInput(object):
                     raise customException(f"Please enter thread amount that is above 0!")
                 return num_threads
 
-            except Exception as err:
-                loggerObj.log_err(f"in \'get_threads()\' --> {err}")
-                print_err(f"Please enter a valid integer for threads", True)
             except customException as err:
                 # I know why exception was thrown, that's why we're using the customException
                 # because we want the user to see the message
                 loggerObj.log_err(f"in \'get_threads()\' --> {err}")
                 print_err(f"{err}", False)
+            except Exception as err:
+                loggerObj.log_err(f"in \'get_threads()\' --> {err}")
+                print_err(f"Please enter a valid integer for threads", True)
+
     def get_checker_type(self) -> ProxyType:
         number_to_enum = {
             1: CheckerType.WEBSITE,
@@ -163,7 +198,10 @@ class GetUserInput(object):
                         {Cols.RED} [*] - {Cols.MAGENTA} [ Sockets are more {Cols.RED}dangerous {Cols.MAGENTA}without a VPN + faster ]
 
                         {Cols.RED} [1] - {Cols.YELLOW} [ Website ]
+                        {Cols.YELLOW}[*] More accurate, safer, don't need to use a VPN
+                        
                         {Cols.RED} [2] - {Cols.YELLOW} [ Sockets ]
+                        {Cols.YELLOW}[*] Faster, use with a VPN, X-VPN is free
 
                         {Display.LINE}
                     ''') 
@@ -173,9 +211,9 @@ class GetUserInput(object):
                 else:
                     return number_to_enum[checker_type]
 
-            except Exception as err:
-                loggerObj.log_err(f"in \'get_checker_type()\' --> {err}")
-                print_err(f"Something went wrong, please try again", False)
             except customException as err:
                 loggerObj.log_err(f"in \'get_checker_type()\' --> {err}")
                 print_err(f"{err}", True)
+            except Exception as err:
+                loggerObj.log_err(f"in \'get_checker_type()\' --> {err}")
+                print_err(f"Something went wrong, please try again", False)

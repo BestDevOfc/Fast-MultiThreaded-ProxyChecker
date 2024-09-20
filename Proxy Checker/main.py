@@ -1,12 +1,8 @@
-'''
-Proxy checker should have API 1 and API 2
-API 1 (web): 
-    - using HTTP get requests
-API 2 (sockets):
-    - using sockets
-
-    reason it's different is because sockets are faster but can lead to bans + VPNs may block the socket connections.
-'''
+################################################
+# Author:  alimuhammadsecured
+# Linkedin: https://www.linkedin.com/in/muhammadalisecured/
+# Blogs/Bug Bounty Writeups: https://medium.com/@alimuhammadsecured
+################################################
 
 
 from src.templates import*
@@ -18,21 +14,24 @@ from src.proxyConfig import ProxyType, CheckerType
 
 # TODO: proxy identifier (auto-sorter, slower, more bandwith)
 # TODO: test on windows as well.
-# TODO: implement the new API (socket API)
 
 
 @func_logger
 def main():
     inputObj = GetUserInput()
     
-    proxy_type: ProxyType = inputObj.get_proxy_type()
     proxies_list: list[bytes] = inputObj.get_proxies()
     num_threads: int = inputObj.get_threads()
     
     # NOTE: not used bcs I need to update it to support check types.
     checker_type: CheckerType = inputObj.get_checker_type()
 
-    CheckerObj = ProxyChecker(proxies_list, num_threads, proxy_type)
+    if checker_type == CheckerType.SOCKET:
+        proxy_type: ProxyType = inputObj.get_proxy_type(can_use_sorter=True)
+    else:
+        proxy_type: ProxyType = inputObj.get_proxy_type(can_use_sorter=False)
+
+    CheckerObj = ProxyChecker(proxies_list, num_threads, proxy_type, checker_type)
     CheckerObj.start_checker()
     
 if __name__ == "__main__":

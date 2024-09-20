@@ -1,3 +1,4 @@
+import socket
 import sys
 import random
 import requests
@@ -9,6 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 # simple configurations (headers, web API to test proxies on, http://httpbin.org/ip is used by default)
 from src.templates import*
 from src.proxyConfig import ProxyResources, ProxyType
+from src.proxyConfig import CheckerType
 
 class ProxyChecker(object):
     '''
@@ -18,12 +20,13 @@ class ProxyChecker(object):
             2) Website URLs (safest without a VPN being used.)
     
     '''
-    def __init__(self, proxies_list: list[str], threads: int, proxy_type: ProxyType, timeout: int = 5) -> None:
+    def __init__(self, proxies_list: list[str], threads: int, proxy_type: ProxyType, checker_type: CheckerType, timeout: int = 5) -> None:
         self.proxies_list = proxies_list
         self.threads = threads                              # NOTE: I wonder if we can use multiple cores and throw threads on those
                                                             # for even higher speeds.
 
         self.proxy_type = proxy_type                        # we use an ENUM for this to keep development easier and tidy
+        self.checker_type = checker_type                    # specifies whether we're using sockets to check if the proxy is valid or a website.
         self.timeout = timeout                              # we're going to keep this at defaulted 5 seconds
         self.config = ProxyResources().load_cfg()           # (for dev) simple config of rotating userAgents + HTTP URL to test proxies on.
         self.results_file = open(self.create_results_file(), 'w')
@@ -87,6 +90,42 @@ class ProxyChecker(object):
 
         
         input(f"{Cols.GREEN}[ Done! ]")
+    def check_proxy_socket(self, proxy: bytes) -> bool:
+        '''
+            API 2, uses socket connection to test if the proxy is valid, could've combined this into a 
+            single function, but it's more modularized as a separate function.
+
+            *** NOTE! Doesn't matter the proxy type, therefore, if using the proxy sorter module it may be possible to use this
+            socket method to check if the proxy is even alive and then go ahead and try using that proxy 
+            in the sorter function!
+
+        '''
+        try:
+            proxy = proxy.decode().strip().rstrip()
+            # extract the port and IP only
+            proxy_host, proxy_port = proxy.split(':', 1)
+            proxy_port = int(proxy_port)
+
+            # Create a socket object
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.settimeout(self.timeout)
+            
+            # Attempt to connect to the proxy
+            s.connect((proxy_host, proxy_port))
+            
+            # If connection is successful, close the socket and return True
+            s.close()
+
+            self.results_stats['Valids'] += 1
+            with self.ThreadLocker:
+                self.results_file.write(f"{proxy}\n")
+                self.results_file.flush()
+
+            return True
+        except Exception as err:
+            self.results_stats['Invalids'] += 1
+            return False
+        ...
     def check_proxy_web(self, proxy: bytes) -> bool:
         '''
         
@@ -121,20 +160,26 @@ class ProxyChecker(object):
                 self.results_file.write(f"{proxy}\n")
                 self.results_file.flush()
             # self.ThreadLocker.release()
+            return True
 
             
         except Exception as err:
             # proxy is not valid since an exception was thrown, could be bcs of timeout or invalid format of that proxy
             # regardless, we'll count it as an invalid
             self.results_stats['Invalids'] += 1
+            return False
 
     def start_checker(self):
         # Daemon thread (runs in background, when program exits thread exits, clean termination.)
         display_thread = threading.Thread(target=self.display_results, daemon=True)
         display_thread.start()
 
+        proxy_checker_APIs: dict = {
+            CheckerType.WEBSITE: self.check_proxy_web,
+            CheckerType.SOCKET: self.check_proxy_socket
+        }
         with ThreadPoolExecutor(max_workers=self.threads) as executor:
-            executor.map(self.check_proxy_web, self.proxies_list)
+            executor.map(proxy_checker_APIs[self.checker_type], self.proxies_list)
         
         '''
             * Had an annoying bug where the program would enter a I/O blocking state 
