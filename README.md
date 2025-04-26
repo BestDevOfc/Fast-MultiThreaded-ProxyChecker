@@ -55,5 +55,6 @@ TODOs:
 3. Proxy Sorter for unknown proxies
 4. Properly clean up the typing and use MyPy to ensure you're doing it correctly.
 5. use actual **ENUMS** from python instead of Cols Object!
+6. for private functions in the class use self._FUNC_NAME 
 
 
