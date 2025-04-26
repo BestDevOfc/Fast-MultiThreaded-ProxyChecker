@@ -54,5 +54,6 @@ TODOs:
 2. More testing on Linux & Windows (Developed on Mac OS X)
 3. Proxy Sorter for unknown proxies
 4. Properly clean up the typing and use MyPy to ensure you're doing it correctly.
+5. use actual **ENUMS** from python instead of Cols Object!
 
 
